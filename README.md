@@ -1,2 +1,2 @@
-# Max-Sick-Addon-Babo-Appearance
-Appearance integration with Babo mods
+# Max Sick Addon - Babo appearance integration
+Appearance integration with Babo mods.
