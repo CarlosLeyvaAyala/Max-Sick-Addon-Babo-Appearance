@@ -38,6 +38,7 @@ export const Ass = MathLib.CubicSpline(data.baboAss)
 export const Boobs = MathLib.CubicSpline(data.baboBoobs)
 
 export enum FaceFactions {
+  none,
   ugly,
   plain,
   average,
@@ -46,6 +47,7 @@ export enum FaceFactions {
 }
 
 export const FaceFactionsC = [
+  0, // none
   0x08f8d9, // ugly
   0x08f8da, // plain
   0x08f8db, // average
@@ -54,6 +56,7 @@ export const FaceFactionsC = [
 ]
 
 export enum AssFactions {
+  none,
   tiny,
   nice,
   big,
@@ -61,6 +64,7 @@ export enum AssFactions {
 }
 
 export const AssFactionsC = [
+  0, // none
   0x08f8d5, // tiny
   0x08f8d6, // nice
   0x08f8d8, // big
@@ -68,6 +72,7 @@ export const AssFactionsC = [
 ]
 
 export enum BoobsFactions {
+  none,
   tiny,
   nice,
   big,
@@ -77,6 +82,7 @@ export enum BoobsFactions {
 }
 
 export const BoobsFactionsC = [
+  0, // none
   0x08f8d4, // tiny
   0x08f8cc, // nice
   0x08f8ce, // big
