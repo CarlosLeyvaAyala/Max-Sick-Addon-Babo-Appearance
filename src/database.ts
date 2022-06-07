@@ -13,7 +13,7 @@ export interface BaboData {
 
 const modName = "maxick-addon-babo"
 const displayName = "Maxick_Addon_Babo"
-const logLvl = DebugLib.Log.LevelFromValue(DebugLib.Log.Level.verbose)
+const logLvl = DebugLib.Log.LevelFromValue(DebugLib.Log.Level.info)
 
 /** All data needed for this mod to work. */
 //@ts-ignore
@@ -29,6 +29,7 @@ const d = DebugLib.Log.CreateAll(
 export const LN = d.None
 export const LV = d.Verbose
 export const LI = d.Info
+export const LVT = d.TapV
 
 /** Function to calculate face appearance. */
 export const Face = MathLib.CubicSpline(data.baboFace)

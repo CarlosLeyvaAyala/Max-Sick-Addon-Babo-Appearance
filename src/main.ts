@@ -1,37 +1,33 @@
 import {
   AppearanceFaction,
+  Ass,
   AssFactions,
   AssFactionsC,
+  Boobs,
   BoobsFactions,
   BoobsFactionsC,
-  data,
   Face,
   FaceFactions,
   FaceFactionsC,
+  LI,
   LN,
   LV,
+  LVT,
 } from "database"
-import { Actor, Debug, Faction, Form, Game, on, once } from "skyrimPlatform"
+import { Actor, Debug, Faction, Game, on, once } from "skyrimPlatform"
 import { JOURNEY_DAYS } from "maxick_compatibility"
 import { MathLib } from "Dmlib"
 
 export function main() {
   LN("Successful initialization")
-  data.baboFace.forEach((v) => {
-    LN(`${v.x}, ${v.y}`)
-  })
 
   on("modEvent", (e) => {
     if (e.eventName === JOURNEY_DAYS) UpdatePerceivedAppearance(e.numArg)
-  })
-
-  once("update", () => {
-    InitFactions()
-    player = Game.getPlayer() as Actor
+    if (e.eventName === "Maxick_OnGameReloaded") LV("Game reloaded from Maxick")
   })
 }
 
-const XToFaceFaction = (x: number) =>
+const YToFaceFaction = (x: number) =>
   x < 19
     ? FaceFactions.ugly
     : x < 40
@@ -42,7 +38,7 @@ const XToFaceFaction = (x: number) =>
     ? FaceFactions.pretty
     : FaceFactions.beautiful
 
-const XToAssFaction = (x: number) =>
+const YToAssFaction = (x: number) =>
   x < 30
     ? AssFactions.tiny
     : x < 50
@@ -51,7 +47,7 @@ const XToAssFaction = (x: number) =>
     ? AssFactions.big
     : AssFactions.amazing
 
-const XToBoobsFaction = (x: number) =>
+const YToBoobsFaction = (x: number) =>
   x < 30
     ? BoobsFactions.tiny
     : x < 50
@@ -65,75 +61,85 @@ const XToBoobsFaction = (x: number) =>
     : BoobsFactions.enormous
 
 function UpdatePerceivedAppearance(journeyPercent: number) {
+  LV("-----------------------------")
   LV(`Got journey: ${journeyPercent}`)
+  LV("-----------------------------")
   const j = MathLib.ForcePercent(journeyPercent)
+
+  LV(`Setting up face`)
   SetFaction(
-    faceFactions,
-    j,
-    100,
-    XToFaceFaction,
+    Face(j) * 100,
+    FaceFactionsC,
+    YToFaceFaction,
     (v) => "Your face is now " + FaceFactions[v]
   )
+
+  LV(`Setting up ass`)
   SetFaction(
-    assFactions,
-    j,
-    100,
-    XToAssFaction,
+    Ass(j) * 100,
+    AssFactionsC,
+    YToAssFaction,
     (v) => "Your ass now looks " + AssFactions[v]
   )
+
+  LV(`Setting up boobs`)
   SetFaction(
-    boobsFactions,
-    j,
-    120,
-    XToBoobsFaction,
+    Boobs(j) * 120,
+    BoobsFactionsC,
+    YToBoobsFaction,
     (v) => "Your boobs now look " + BoobsFactions[v]
   )
 }
 
 function SetFaction(
+  y: number,
   factionList: FactionList,
-  journeyPercent: number,
-  maxValue: number,
   valToFaction: (x: number) => AppearanceFaction,
   changedMsg: (v: AppearanceFaction) => string
 ) {
-  const x = journeyPercent * maxValue
-  const newFaction = valToFaction(x)
+  const newFaction = valToFaction(LVT("Got <y> appearance", y))
+  LV(`New faction ${newFaction}`)
   const changed = SetAppearanceFaction(factionList)(newFaction)
-  if (changed) Debug.notification(changedMsg(newFaction))
+  if (changed) {
+    const m = changedMsg(newFaction)
+    Debug.notification(m)
+    LI(m)
+  }
 }
 
-type FactionList = (Faction | null)[]
-let faceFactions: FactionList = []
-let assFactions: FactionList = []
-let boobsFactions: FactionList = []
+type FactionList = number[]
 
-let player: Actor
-
-function InitFactions() {
-  const SlaxFactionById = (formID: number) =>
-    Faction.from(Game.getFormFromFile(formID, "SexlabAroused.esm"))
-  const F = (id: number) => SlaxFactionById(id)
-
-  faceFactions = FaceFactionsC.map(F)
-  assFactions = AssFactionsC.map(F)
-  boobsFactions = BoobsFactionsC.map(F)
-}
+const player = () => Actor.from(Game.getPlayer())
 
 function SetAppearanceFaction(factionList: FactionList) {
   return (newFaction: AppearanceFaction): boolean => {
-    const nf = factionList[newFaction]
-    if (!nf) return false
+    const nf = LVT("Intended faction", factionList[newFaction])
+    const Slax = (id: number) =>
+      Faction.from(Game.getFormFromFile(id, "SexlabAroused.esm"))
+    const newF = () => Slax(nf)
+    if (!newF) return false
+    LV(`Got faction: ${newF()?.getName()}`)
 
-    const changedFactions = !player.isInFaction(nf)
+    const changedFactions = !player()?.isInFaction(newF())
+    if (!changedFactions) {
+      LV(`No need to change faction.`)
+      return false
+    }
 
+    LV(`There was a faction change.`)
     factionList.forEach((faction) => {
       if (!faction) return
-      player.removeFromFaction(faction)
+      player()?.removeFromFaction(Slax(faction))
     })
 
-    // Send event for papyrus because SP doesn't have an `addTofaction` function
-    player.sendModEvent("MaxickAppearanceFaction", "", nf.getFormID())
+    // Send event for papyrus because SP doesn't have an `addTofaction` function.
+    // To avoid adding yet another esp file, setting the player faction is done in
+    // Maxick_Main.psc in https://github.com/CarlosLeyvaAyala/Max-Sick-Gains
+    // This is dirty and not really good, but meh... I'm the one developing both
+    // files anyway.
+    player()?.sendModEvent("MaxickAppearanceFaction", "", nf)
+    LV(`New faction was sent to Papyrus: ${newF()?.getName()}`)
+
     return changedFactions
   }
 }
