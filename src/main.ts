@@ -14,9 +14,9 @@ import {
   LV,
   LVT,
 } from "database"
-import { Actor, Debug, Faction, Game, on, once } from "skyrimPlatform"
-import { JOURNEY_DAYS } from "maxick_compatibility"
 import { MathLib } from "Dmlib"
+import { JOURNEY_DAYS } from "maxick_compatibility"
+import { Actor, Debug, Faction, Game, on } from "skyrimPlatform"
 
 export function main() {
   LN("Successful initialization")
@@ -102,7 +102,7 @@ function SetFaction(
   const changed = SetAppearanceFaction(factionList)(newFaction)
   if (changed) {
     const m = changedMsg(newFaction)
-    Debug.notification(m)
+    Debug.messageBox(m)
     LI(m)
   }
 }
