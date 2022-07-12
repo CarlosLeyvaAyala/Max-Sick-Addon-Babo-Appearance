@@ -10,12 +10,13 @@ import {
   FaceFactions,
   FaceFactionsC,
   LI,
+  LIT,
   LN,
   LV,
   LVT,
 } from "database"
 import { MathLib } from "Dmlib"
-import { JOURNEY_DAYS } from "maxick_compatibility"
+import { isInTestingMode, JOURNEY_DAYS } from "maxick_compatibility"
 import { Actor, Debug, Faction, Game, on } from "skyrimPlatform"
 
 export function main() {
@@ -66,7 +67,7 @@ function UpdatePerceivedAppearance(journeyPercent: number) {
   LV("-----------------------------")
   const j = MathLib.ForcePercent(journeyPercent)
 
-  LV(`Setting up face`)
+  LI(`Setting up face`)
   SetFaction(
     Face(j) * 100,
     FaceFactionsC,
@@ -74,7 +75,7 @@ function UpdatePerceivedAppearance(journeyPercent: number) {
     (v) => "Your face is now " + FaceFactions[v]
   )
 
-  LV(`Setting up ass`)
+  LI(`Setting up ass`)
   SetFaction(
     Ass(j) * 100,
     AssFactionsC,
@@ -82,7 +83,7 @@ function UpdatePerceivedAppearance(journeyPercent: number) {
     (v) => "Your ass now looks " + AssFactions[v]
   )
 
-  LV(`Setting up boobs`)
+  LI(`Setting up boobs`)
   SetFaction(
     Boobs(j) * 120,
     BoobsFactionsC,
@@ -97,12 +98,13 @@ function SetFaction(
   valToFaction: (x: number) => AppearanceFaction,
   changedMsg: (v: AppearanceFaction) => string
 ) {
-  const newFaction = valToFaction(LVT("Got <y> appearance", y))
+  const newFaction = valToFaction(LIT("Got <y> appearance", y))
   LV(`New faction ${newFaction}`)
   const changed = SetAppearanceFaction(factionList)(newFaction)
   if (changed) {
     const m = changedMsg(newFaction)
-    Debug.messageBox(m)
+    const M = isInTestingMode() ? Debug.notification : Debug.messageBox
+    M(m)
     LI(m)
   }
 }
@@ -118,7 +120,7 @@ function SetAppearanceFaction(factionList: FactionList) {
       Faction.from(Game.getFormFromFile(id, "SexlabAroused.esm"))
     const newF = () => Slax(nf)
     if (!newF) return false
-    LV(`Got faction: ${newF()?.getName()}`)
+    LI(`Got faction: ${newF()?.getName()}`)
 
     const changedFactions = !player()?.isInFaction(newF())
     if (!changedFactions) {
@@ -126,7 +128,7 @@ function SetAppearanceFaction(factionList: FactionList) {
       return false
     }
 
-    LV(`There was a faction change.`)
+    LI(`There was a faction change.`)
     factionList.forEach((faction) => {
       if (!faction) return
       player()?.removeFromFaction(Slax(faction))
