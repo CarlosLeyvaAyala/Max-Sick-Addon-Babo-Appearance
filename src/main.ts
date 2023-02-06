@@ -16,7 +16,7 @@ import {
   LVT,
 } from "database"
 import { MathLib } from "Dmlib"
-import { isInTestingMode, JOURNEY_DAYS } from "maxick_compatibility"
+import { JOURNEY_DAYS } from "maxick_compatibility"
 import { Actor, Debug, Faction, Game, on } from "skyrimPlatform"
 
 export function main() {
@@ -103,7 +103,7 @@ function SetFaction(
   const changed = SetAppearanceFaction(factionList)(newFaction)
   if (changed) {
     const m = changedMsg(newFaction)
-    const M = isInTestingMode() ? Debug.notification : Debug.messageBox
+    const M = false ? Debug.notification : Debug.messageBox
     M(m)
     LI(m)
   }
